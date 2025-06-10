@@ -7,7 +7,6 @@ from typing import Dict
 import numpy as np
 
 # Load the models
-nutrient_model = joblib.load("nutrient_model.pkl")  # Dictionary of 4 RandomForestRegressors
 preprocessor = joblib.load('rf_scaler.pkl')
 harvest_model = joblib.load('rf_model.pkl')
 
