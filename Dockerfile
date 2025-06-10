@@ -2,7 +2,7 @@
 FROM python:3.10-slim
 
 # Set work directory
-WORKDIR /app
+WORKDIR /model_railway
 
 # Install dependencies
 COPY requirements.txt .
