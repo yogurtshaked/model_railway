@@ -5,14 +5,13 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt .
+COPY app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy everything else
-COPY ./app ./app
+# Copy app and model files
+COPY app/ ./app
+COPY rf_model.pkl .
+COPY rf_scaler.pkl .
 
-# Expose port
-EXPOSE 8000
-
-# Command to run the app
+# Run the app
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
