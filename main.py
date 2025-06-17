@@ -76,7 +76,7 @@ def predict_harvest(window: List[SensorData]):
         raise HTTPException(status_code=400, detail="Payload cannot be empty")
 
     # 1) Build & sort DataFrame (no early exit, no padding)
-   df = pd.DataFrame([{
+    df = pd.DataFrame([{
         'Date':        datetime.strptime(r.date, "%Y-%m-%d"),
         'Temperature': r.temperature,
         'Humidity':    r.humidity,
