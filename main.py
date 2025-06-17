@@ -119,4 +119,5 @@ def predict_harvest(window: List[SensorData]):
 
     print("\n=========== Harvest Day Prediction ===========")
     print(preds)  # Display the prediction with decimals
-    return {"predicted_harvest_day": preds}
+    predicted_day = float(preds[-1])  # Get the last prediction
+    return {"predicted_harvest_day": predicted_day}
