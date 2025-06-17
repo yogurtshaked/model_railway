@@ -76,26 +76,37 @@ def predict_harvest(window: List[SensorData]):
         raise HTTPException(status_code=400, detail="Payload cannot be empty")
 
     # 1) Build & sort DataFrame (no early exit, no padding)
-    df = pd.DataFrame([{
+   df = pd.DataFrame([{
         'Date':        datetime.strptime(r.date, "%Y-%m-%d"),
         'Temperature': r.temperature,
         'Humidity':    r.humidity,
         'TDS Value':   r.tds,
         'pH Level':    r.ph,
-    } for r in window]).sort_values('Date').reset_index(drop=True)
-
-    df['Growth Days'] = (df['Date'] - df['Date'].min()).dt.days
-
-    # 3) Pad backwards to ensure 7 days
-
-    # 4) Feature engineering
-    df = create_features(df)
+        'Plant_ID':    1,  # simulate single plant ID
+    } for r in window])
+    
+    # 1) Average multiple readings per day (like in local model)
+    sensor_cols = ['Temperature', 'Humidity', 'TDS Value', 'pH Level']
+    daily_avg = (
+        df.groupby(['Plant_ID', 'Date'])[sensor_cols]
+          .mean()
+          .reset_index()
+          .sort_values(['Plant_ID', 'Date'])
+    )
+    
+    # 2) Add Growth Days
+    daily_avg['Growth Days'] = (
+        daily_avg.groupby('Plant_ID')['Date']
+                 .transform(lambda x: (x - x.min()).dt.days)
+    )
+    # 3) Feature engineering
+    feats = create_features(daily_avg, date_col='Date')
     print("\n=== Final 7-Day DataFrame ===")
-    print(df)
+    print(feats)
 
     # 5) Prepare model input
     expected = list(preprocessor.feature_names_in_)
-    X = df.reindex(columns=expected, fill_value=0)
+    X = feats.reindex(columns=expected, fill_value=0)
     X_scaled = preprocessor.transform(X)
 
     print("\n=== Model Input After Preprocessing ===")
