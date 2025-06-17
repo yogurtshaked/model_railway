@@ -35,43 +35,39 @@ def create_features(
     features = ['Temperature', 'Humidity', 'TDS Value', 'pH Level']
 
     # 0) Assign phase based on Growth Days if available
-    if 'Growth Days' in df.columns:
-        gd = df['Growth Days']
-        df[phase_col] = np.where(
-            gd < 15, 0,
-            np.where(gd < 30, 1, 2)
-        ).astype(int)
-    else:
-        df[phase_col] = 0
+    if 'Growth Days' not in df.columns:
+        df['Growth Days'] = (df[date_col] - df[date_col].min()).dt.days
 
-    # 1) Expanding statistics for each feature
+    # Determine Phase
+    df[phase_col] = np.where(
+        df['Growth Days'] < 15, 0,
+        np.where(df['Growth Days'] < 30, 1, 2)
+    ).astype(int)
+
+    out = []
+
+    # Treat entire DataFrame as one plant
+    plant_df = df.sort_values(date_col).reset_index(drop=True)
+
+    # Expanding stats for all features
     for feat in features:
-        exp = df[feat].expanding(min_periods=1)
-        df[f"{feat} Expanding Mean"] = exp.mean()
-        df[f"{feat} Expanding Std"] = exp.std()
-        df[f"{feat} Expanding Min"] = exp.min()
-        df[f"{feat} Expanding Max"] = exp.max()
-        df[f"{feat} Expanding Median"] = exp.median()
+        exp = plant_df[feat].expanding(min_periods=1)
+        plant_df[f"{feat} Expanding Mean"] = exp.mean()
+        plant_df[f"{feat} Expanding Std"] = exp.std()
+        plant_df[f"{feat} Expanding Min"] = exp.min()
+        plant_df[f"{feat} Expanding Max"] = exp.max()
+        plant_df[f"{feat} Expanding Median"] = exp.median()
 
-    # 2) Phase-based summary statistics
-    agg_funcs = ['mean', 'min', 'max', 'median', 'std']
-    phase_stats = (
-        df
-        .groupby(phase_col)[features]
-        .agg(agg_funcs)
-        .reset_index()
-    )
-    # Flatten multi-index columns
-    phase_stats.columns = (
-        [phase_col] +
-        [f"{feat} Phase {stat.capitalize()}"
-         for feat, stat in phase_stats.columns
-         if feat != phase_col]
-    )
+    # Phase-based expanding stats
+    for feat in features:
+        grp = plant_df.groupby(phase_col)[feat]
+        plant_df[f"{feat} Phase Mean"] = grp.expanding(min_periods=1).mean().reset_index(level=0, drop=True)
+        plant_df[f"{feat} Phase Std"] = grp.expanding(min_periods=1).std().reset_index(level=0, drop=True)
+        plant_df[f"{feat} Phase Min"] = grp.expanding(min_periods=1).min().reset_index(level=0, drop=True)
+        plant_df[f"{feat} Phase Max"] = grp.expanding(min_periods=1).max().reset_index(level=0, drop=True)
+        plant_df[f"{feat} Phase Median"] = grp.expanding(min_periods=1).median().reset_index(level=0, drop=True)
 
-    # 3) Merge back phase summaries
-    df = df.merge(phase_stats, on=phase_col, how='left')
-    return df
+    return plant_df
 
 
 @app.post("/predict-harvest")
