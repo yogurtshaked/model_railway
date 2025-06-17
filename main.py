@@ -104,8 +104,6 @@ def predict_harvest(window: List[SensorData]):
     print("\n=== Final 7-Day DataFrame ===")
     print(feats)
 
-    X = feats.drop(columns=['Plant_ID', 'Date', 'Growth Days', 'Harvest Day'], errors='ignore')
-
     # 5) Prepare model input
     expected = list(preprocessor.feature_names_in_)
     X_scaled = preprocessor.transform(X)
