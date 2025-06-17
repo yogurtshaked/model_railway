@@ -107,4 +107,4 @@ def predict_harvest(window: List[SensorData]):
     y = harvest_model.predict(X)
     print("\n=== Harvest Day Prediction ===")
     print(y[0])  # Display the prediction with decimals
-    return {"predicted_harvest_day": float(y[0])}
+    return {"predicted_harvest_day": y[0]}
