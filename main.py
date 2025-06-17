@@ -95,8 +95,8 @@ def predict_harvest(window: List[SensorData]):
 
     # 5) Prepare model input
     expected = list(preprocessor.feature_names_in_)
-    last_row = df.iloc[[-1]].reindex(columns=expected, fill_value=0)
-    X = preprocessor.transform(last_row)
+    X = df.reindex(columns=expected, fill_value=0)
+    X_scaled = preprocessor.transform(X)
 
     print("\n=== Model Input After Preprocessing ===")
     print(pd.DataFrame(X, columns=preprocessor.get_feature_names_out()))
