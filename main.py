@@ -88,6 +88,8 @@ def predict_harvest(window: List[SensorData]):
         'pH Level':    r.ph,
     } for r in window]).sort_values('Date').reset_index(drop=True)
 
+    df['Growth Days'] = (df['Date'] - df['Date'].min()).dt.days
+
     # 3) Pad backwards to ensure 7 days
 
     # 4) Feature engineering
