@@ -102,7 +102,9 @@ def predict_harvest(window: List[SensorData]):
     print(pd.DataFrame(X, columns=preprocessor.get_feature_names_out()))
 
     # 6) Predict
-    y = harvest_model.predict(X)
-    print("\n=== Harvest Day Prediction ===")
-    print(y[0])  # Display the prediction with decimals
-    return {"predicted_harvest_day":y[0]}
+    preds = harvest_model.predict(X_scaled)
+
+    print("\n=========== Harvest Day Prediction ===========")
+    print(preds)  # Display the prediction with decimals
+    average_prediction = float(np.mean(preds))
+    return {"predicted_harvest_day": average_prediction}
