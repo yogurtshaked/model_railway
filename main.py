@@ -119,5 +119,4 @@ def predict_harvest(window: List[SensorData]):
 
     print("\n=========== Harvest Day Prediction ===========")
     print(preds)  # Display the prediction with decimals
-    average_prediction = float(np.mean(preds))
-    return {"predicted_harvest_day": average_prediction}
+    return {"predicted_harvest_day": preds}
