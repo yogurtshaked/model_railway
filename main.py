@@ -92,19 +92,19 @@ def predict_harvest(window: List[SensorData]):
 
     # 4) Feature engineering
     df = create_features(df)
-    logging.info("\n=== Final 7-Day DataFrame ===")
-    logging.info(df)
+    print("\n=== Final 7-Day DataFrame ===")
+    print(df)
 
     # 5) Prepare model input
     expected = list(preprocessor.feature_names_in_)
     last_row = df.iloc[[-1]].reindex(columns=expected, fill_value=0)
     X = preprocessor.transform(last_row)
 
-    logging.info("\n=== Model Input After Preprocessing ===")
-    logging.info(pd.DataFrame(X, columns=preprocessor.get_feature_names_out()))
+    print("\n=== Model Input After Preprocessing ===")
+    print(pd.DataFrame(X, columns=preprocessor.get_feature_names_out()))
 
     # 6) Predict
     y = harvest_model.predict(X)
-    logging.info("\n=== Harvest Day Prediction ===")
-    logging.info(y[0])  # Display the prediction with decimals
+    print("\n=== Harvest Day Prediction ===")
+    print(y[0])  # Display the prediction with decimals
     return {"predicted_harvest_day": y[0]}
